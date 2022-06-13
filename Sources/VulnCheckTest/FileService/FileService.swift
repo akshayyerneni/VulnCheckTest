@@ -19,12 +19,17 @@ protocol FileService {
     func getJSONFrom(fileAt path: String) -> Data?
 }
 
+protocol XMLReader {
+    func getXML(elementName: String, attributeDict: [String:String])
+}
+
 class FileInfoProvider: NSObject, FileService {
     
     private let fileManager: FileManager = .default
     
+    var delegate: XMLReader? = nil
+    
     public override init() {
-        
     }
     
     func isValidDirectory(path: String) -> Bool {
@@ -75,27 +80,6 @@ class FileInfoProvider: NSObject, FileService {
     
     func readXMLFile(from path: String) {
         
-//        if fileManager.fileExists(atPath: path),
-//           let stringData = try? String(contentsOfFile: path) {
-//            let lines = stringData.components(separatedBy: .newlines)
-//
-//            var cpeTagToggle = false
-//
-//            for line in lines {
-//                if line.contains("<cpe-23:cpe23-item name=\"") {
-//                    cpeTagToggle = true
-//                    let components = line.components(separatedBy: ":")
-//                    print(components)
-//                }
-//
-//                let str = "<cpe-23:cpe23-item name=\""
-//
-//                if line.contains("</cpe-item>") {
-//                    cpeTagToggle = false
-//                }
-//            }
-//        }
-        guard let pathURL = URL(string: path) else {return}
         do {
             let xmlStr = try String(contentsOfFile: path)
             guard let data = xmlStr.data(using: .utf8) else {return}
@@ -105,7 +89,7 @@ class FileInfoProvider: NSObject, FileService {
             if success {
                 print("Parsing successful")
             } else {
-                print(parser.parserError)
+                print("Parser Error: \(parser.parserError?.localizedDescription ?? "Unknown Error")")
             }
         } catch {
             print(error.localizedDescription)
@@ -121,8 +105,7 @@ class FileInfoProvider: NSObject, FileService {
 extension FileInfoProvider: XMLParserDelegate {
     
     func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
-        print(elementName)
-        print(attributeDict)
+        delegate?.getXML(elementName: elementName, attributeDict: attributeDict)
     }
 }
 

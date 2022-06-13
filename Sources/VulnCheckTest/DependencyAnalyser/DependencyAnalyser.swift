@@ -42,3 +42,16 @@ struct DependencyAnalyser {
         }
     }
 }
+
+
+extension DependencyAnalyser: XMLReader {
+    
+    func getXML(elementName: String, attributeDict: [String : String]) {
+        if elementName == "cpe-23:cpe23-item",
+        let name = attributeDict["name"], !name.isEmpty {
+            print(name)
+        }
+    }
+    
+    
+}
